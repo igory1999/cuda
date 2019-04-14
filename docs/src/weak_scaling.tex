@@ -1,0 +1,17 @@
+\subsection{weak}
+\begin{frame}[fragile]
+  \frametitle{Scaling: weak}
+\begin{itemize}
+\item Often we are interested in a different question: given more processors, how much more work 
+  can we do during the fixed amount of time? 
+This is called {\color{mycolordef}weak scaling} and is described by {\color{mycolordef}Gustafson's law}.
+\begin{equation*}
+morework = \frac{P*N + (1 - P)}{P + (1 - P)} = P*N + (1 - P)
+\end{equation*}
+\item 9 women producing 1 baby in 1 month - strong scaling
+\item 9 women producing 9 babies instead of 1 baby in 9 months - weak scaling
+\item Again, linear increase of the amount of work with the number of available processors is usually too optimistic: 
+  there will likely be bottlenecks in communication bandwidth, synchronization, etc. that would limit strong scaling.
+  For example, if there are 4 lanes in the road, only 4 cars can travel in parallel.
+\end{itemize}
+\end{frame}

@@ -1,0 +1,36 @@
+\section{CUDA programming}
+\begin{frame}[fragile]
+  \frametitle{CUDA programming}
+\begin{itemize}
+\item The native way to program GPU is to use \mydef{CUDA - Compute Unified Device Architecture} - from NVIDIA. 
+\item The latest version of CUDA is 10.0
+\item NVIDIA first was producing GPU cards as pure graphics accelerators before it was realized that GPU card can be used to speed up numerical computations, especially those that involve a lot of linear algebra
+\item CUDA was introduced to support using GPU cards for numerical computations in 2007.
+\item CUDA provides an extension of C/C++ syntax and libraries that allow to write functions, called {\color{mycolordef}kernels}, that get executed in parallel by multiple threads on GPU. 
+\item CUDA allows to allocated/deallocate memory on GPU and copy data between CPU's RAM and GPU's global memory.
+\item One can also program CUDA in Fortran, Python, Java.
+\item Let us consider the simplest example of adding two vectors.
+\end{itemize}
+\end{frame}
+
+\subsection{Lab 2: thread, block, grid, kernel}
+\input{Lab2.tex}
+
+\subsection{Lab 3: shared memory, barrier}
+\input{Lab3.tex}
+
+\subsection{Lab 4: intrinsics, streams, tools}
+\input{Lab4.tex}
+
+\subsection{Lab 5: occupancy, libraries}
+\input{Lab5.tex}
+
+\subsection{Lab 6: coalescing}
+\input{Lab6.tex}
+
+\subsection{Lab 7: atomics}
+\input{Lab7.tex}
+
+
+
+

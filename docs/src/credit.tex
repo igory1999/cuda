@@ -1,0 +1,51 @@
+\section{Credit Assignment Problem}
+\begin{frame}[fragile]
+  \frametitle{Credit Assignment Problem}
+  \begin{itemize}
+  \item Let us build a model that can be trained to act to maximize rewards
+  \item We shall continue using Cart Pole balancing problem as an example
+  \item As a model, we can, for example, use a neural network:
+  \end{itemize}
+
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+    \includegraphics[width=5cm]{graphs/nn_policy.jpg}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+      \item Since there are two possible states, we need only one neuron that outputs probability $p$ of action 0 (push to the left).
+      \item Why to use probability instead of selecting an action with the highest score? This approach lets the agent to find a 
+        balance between {\color{mycolordef}exporing} new actions and {\color{mycolordef}exploiting} the 
+        actions that are known to work well.
+      \end{itemize}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Credit Assignment Problem}
+  \begin{itemize}
+  \item How do we train such a model?
+  \item If we knew what the best action was at each step, we could train NN as usual,
+    by minimizing the cross entropy between the estimated probability and the target probability using supervised learning.
+  \item However, in RL the only guidance the agent gets is through rewards, and rewards
+    are typically sparse and delayed.
+  \item For example, the agent manages to balance the pole for 100 steps, how can it know which of the 100 actions it took were good, and which were bad? All it knows is that the pole fell after the last action
+    but surely this last action is not entirely responsible.
+  \item A common strategy is to evaluate an action based on the sum of all the rewards that come after it, usually applying a {\color{mycolordef}discount rate} $r$ at each step.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Credit Assignment Problem}
+  \begin{itemize}
+    \item For example, if an agent decides to go right three times in a row and gets $+10$ reward after the first step, $0$ after the second step and $-50$ after the third step, then assuming we use a discount rate $r=0.8$,
+      the first action will have a total score $10+r\times0 + r^2 \times (-50) = -22$
+    \item Discount rate is a metaparameter to select depending on the problem
+    \item If the discount rate is close to 0, then future rewards won't count for much compared to immediate rewards.
+    \item Conversely, if the discount rate is close to 1, then rewards far into the future will count almost as much as immediate rewards.
+    \item Typical discount rates are $0.95-0.99$
+\end{itemize}
+\end{frame}

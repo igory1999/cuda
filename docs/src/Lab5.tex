@@ -1,0 +1,157 @@
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 5: occupancy, libraries}
+\begin{itemize}
+\item In this lab we investigate how to select block size for optimal performance.
+\item First we randomly generate couple arrays directly on GPU using \mycode{curand} library:
+\end{itemize}
+\begin{columns}
+\begin{column}{0.55\textwidth}
+{\tiny
+{\color{mycolorcode}
+\begin{verbatim}
+#include <iostream>
+#include <curand.h>
+using namespace std;
+
+struct random_d_array
+{
+  float *data;
+  int n;
+
+  random_d_array(int n) :n{n}
+  {
+    cudaMalloc((void**)&data, n*sizeof(float));
+    curandGenerator_t gen;
+    curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
+    curandGenerateUniform(gen, data, n);
+  }
+  
+  ~random_d_array()
+  {
+    cudaFree(&data);
+  }
+};
+
+\end{verbatim}
+}
+}
+\end{column}
+\begin{column}{0.45\textwidth}
+
+\begin{itemize}
+\item At compilation the code needs to be linked with the library:
+{\tiny
+{\color{mycolorcli}
+\begin{verbatim}
+nvcc -lcurand -o occupancy occupancy.cu
+\end{verbatim}
+}
+}
+\item Also notice {\color{mycolorcode}\verb|#include <curand.h>|} in the code
+\end{itemize}
+
+\end{column}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 5: occupancy, libraries}
+\begin{itemize}
+\item The program loops until you press 'q' and at each iteration asks you for the block size, computes the corresponding grid size, occupancy, launches the kernel that multiplies two random vectors and measures average run time: 
+\begin{center}
+\begin{tabular}{ |r|r|r|r| }
+\hline
+block size & grid size & run time (ms) & occupancy (\%) \\ \hline
+32 & 32768 & 0.21 & 25 \\ \hline
+64 & 16384 & 0.13 & 50 \\ \hline
+96 & 10923 & 0.12 & 75 \\ \hline
+128 & 8192 & 0.11 & 100 \\ \hline
+256 & 4096 & 0.11 & 100 \\ \hline
+512 & 2048 & 0.11 & 100 \\ \hline
+1024 & 1024 & 0.12 &  100 \\ \hline
+\end{tabular}
+\end{center}
+\item As we can see, the smaller the occupancy, the worse is the running time.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 5: occupancy, libraries}
+  \begin{itemize}
+  \item \mydef{Occupancy} is the ratio of the number of active warps per SM to the
+    maximum number of possible active warps.
+  \item We obviously prefer to keep the whole GPU happily busy all the time.
+  \item Here is how occupancy is computed in this program:
+    {\tiny
+      {\color{mycolorcode}
+\begin{verbatim}
+cudaGetDevice(&device);
+cudaGetDeviceProperties(&prop, device);
+cudaOccupancyMaxActiveBlocksPerMultiprocessor(&numBlocks, MyKernel, blockSize, 0);
+activeWarps = numBlocks * blockSize/prop.warpSize;
+maxWarps = prop.maxThreadsPerMultiProcessor/prop.warpSize;
+cout << "Occupancy: " << (double)activeWarps/maxWarps * 100 << "%" << endl;
+\end{verbatim}
+      }
+    }
+  \item What limits the occupancy?
+  \item The main factor that determine occupancy is \mydef{register availability}. 
+  \item Register storage enables threads to keep local variables nearby for low-latency access. However, the set
+    of registers (known as \mydef{the register file}) is a limited commodity that all threads resident on
+    a multiprocessor must share.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 5: occupancy, libraries}
+  \begin{itemize}
+  \item Registers are allocated to an entire block all at once. 
+  \item So, if each thread block uses many registers, the number of thread blocks that can be resident
+    on a multiprocessor is reduced, thereby lowering the occupancy of the multiprocessor.
+  \item The number of registers available, the maximum number of simultaneous threads
+    resident on each multiprocessor, and the register allocation granularity vary over
+    different compute capabilities.
+  \item To compute occupancy for the given kernel and hardware, one can either use CUDA functions, like in this example,
+    or use an Excel spreadsheet called ``Occupancy Calculator'' that comes with CUDA:
+    {\tiny
+      {\color{mycolorcli}
+\begin{verbatim}
+/software/cuda-10.0-el7-x86_64/tools/CUDA_Occupancy_Calculator.xls
+\end{verbatim}
+      }
+    }
+  \item The {\color{mycolorcli}\verb|--ptxas options=v|} option of \mycli{nvcc} details the number of
+    registers used per thread for each kernel.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 5: occupancy, libraries}
+  \begin{itemize}
+  \item Higher occupancy does not always equate to higher performance - there is a point above
+    which additional occupancy does not improve performance. However, low occupancy always 
+    interferes with the ability to hide memory latency, resulting in performance
+    degradation.
+  \item Here are some recommendations how to choose the block size:
+    \begin{itemize}
+    \item Threads per block should be a multiple of warp size to avoid wasting computation
+      on under-populated warps and to facilitate coalescing.
+    \item A minimum of 64 threads per block should be used
+    \item Between 128 and 256 threads per block is a better choice and a good initial range for
+      experimentation with different block sizes.
+    \item Experiment
+    \end{itemize}
+  \item In the second example we use
+{\tiny
+{\color{mycolorcode}
+\begin{verbatim}
+cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, 
+                                     (void*)MyKernel, 0, arrayCount);
+\end{verbatim}
+}
+}
+to automatically select optimal block size for the given kernel and array size, which is found to be 1024. Running time is 0.018 ms. For non-optimal block size 32, running time is 0.025 ms.
+  \end{itemize}
+\end{frame}

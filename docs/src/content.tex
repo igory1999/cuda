@@ -1,0 +1,44 @@
+
+\section{Content}
+\begin{frame}[fragile]
+  \frametitle{Content}
+
+\begin{itemize}
+\item The tutorial is organized as a spiral: 
+  \begin{itemize}
+    \item For example, rather than presenting everything about parallel algorithms in one big section, we shall keep revisiting algorithms periodically at each circle of the spiral, introducing more and more complicated
+      topics
+    \item At each circle of a spiral we shall try to present enough material about GPU architecture, CUDA programming and parallel algorithms to reach the next level in our understanding of GPU programming and to be able to do 
+      the next lab
+    \item We shall keep moving around the spiral until we run out of topics, audience or time whatever comes earlier.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+  \frametitle{Content}
+\begin{itemize}
+\item The tutorial covers the following topics, not necessarily in this order:
+  \begin{itemize}
+    \item GPU architecture:
+      \begin{itemize}
+      \item Organizing computation into threads, blocks, warps, grid; what is Streaming Multiprocessor (SM), compute capability
+      \item Memory organization: host memory, GPU global and local memory, shared memory, registers, texture and surface memory, constant memory, cache
+      \end{itemize}
+    \item Parallel algorithms: strong and weak scaling, Amdahl and Gustavson laws, map, reduce, scan (inclusive, exclusive), histogram, compact, sort, 
+    \item CUDA programming: 
+      \begin{itemize}
+        \item creating and launching kernels
+        \item moving data between host and device, unified memory
+        \item using streams to interleave computations and data moving
+        \item dynamic parallelism
+        \item optimizing CUDA program
+        \item debugging and profiling CUDA program with {\color{mycolordef}nvidia nsight tools}
+        \item using CUDA accelerated libraries like {\color{mycolorcode}cublas}, {\color{mycolorcode}cusparse}, {\color{mycolorcode}thrust}
+        \item compiling CUDA programs with {\color{mycolorcli}nvcc}
+      \end{itemize}
+  \end{itemize}
+\end{itemize}
+\end{frame}

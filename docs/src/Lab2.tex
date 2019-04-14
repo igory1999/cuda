@@ -1,0 +1,160 @@
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 2: thread, block, grid, kernel}
+\begin{itemize}
+\item In this lab we are adding two vectors, {\color{mycolorcode}\verb|A|} and {\color{mycolorcode}\verb|B|}, 
+  consisting of \verb|50000| floats. The result is put into {\color{mycolorcode}\verb|C|}.
+\item Obviously different elements of the vectors can be added independently from each other in parallel.
+\item First, in the main program we allocate memory for {\color{mycolorcode}\verb|A|}, 
+  {\color{mycolorcode}\verb|B|}, {\color{mycolorcode}\verb|C|} 
+  on the host as usual, with {\color{mycolorcode}\verb|malloc|}, and populate {\color{mycolorcode}\verb|A|} 
+  and {\color{mycolorcode}\verb|B|} with random numbers.
+\item Next we need to allocate memory on GPU card with {\color{mycolorcode}cudaMalloc}:
+{\color{mycolorcode}
+\begin{verbatim}
+float *d_A = NULL, *d_B = NULL,  *d_C = NULL;
+cudaMalloc((void **)&d_A, size);
+cudaMalloc((void **)&d_B, size);
+cudaMalloc((void **)&d_C, size);
+\end{verbatim}
+}
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 2: thread, block, grid, kernel}
+\begin{itemize}
+\item Copy data from the host to the device:
+{\color{mycolorcode}
+\begin{verbatim}
+cudaMemcpy(d_A, h_A, size, cudaMemcpyHostToDevice);
+cudaMemcpy(d_B, h_B, size, cudaMemcpyHostToDevice);
+\end{verbatim}
+}
+\item Next we need to decide how to divide our work into blocks of threads.
+  \begin{itemize}
+  \item Each block runs entirely on one of SMs. 
+  \item Different blocks might run in parallel or sequentially and get launched in any order on the same or different SMs.
+  \item Each block can have no more than 1024 threads.
+  \item Since the warp size is 32, block size should be divisible by 32.
+  \end{itemize}
+\item We shall consider tradeoffs for different choices later but for now let us just use 
+  256 threads per block and compute how many blocks we need in order to add 50000 elements.
+{\tiny
+{\color{mycolorcode}
+\begin{verbatim}
+int numElements = 50000;
+int threadsPerBlock = 256;
+int blocksPerGrid =(numElements + threadsPerBlock - 1) / threadsPerBlock;
+\end{verbatim}
+}
+}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 2: thread, block, grid, kernel}
+\begin{itemize}
+\item The actual work is done in a {\color{mycolordef}kernel} - function executed by each thread in the job:
+{\tiny
+{\color{mycolorcode}
+\begin{verbatim}
+__global__ void vectorAdd(const float *A, const float *B, float *C, int numElements)
+{
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < numElements)
+        C[i] = A[i] + B[i];
+}
+\end{verbatim}
+}
+}
+\item Notice {\color{mycolorcode}\verb|__global__|} in front of the GPU function
+\item From inside the kernel one can use the following variables:
+  \begin{itemize}
+    \item {\color{mycolorcode}\verb|blockDim.x|} - block size;
+    \item {\color{mycolorcode}\verb|blockIdx.x|} - block id in the grid;
+    \item {\color{mycolorcode}\verb|threadIdx.x|} - thread id in the block;
+  \end{itemize}
+\item For each thread, the kernel computes the index {\color{mycolorcode}\verb|i|} of the vector variables that it handles.
+\item The corresponding elements of {\color{mycolorcode}\verb|A|} and {\color{mycolorcode}\verb|B|} are added and stored in {\color{mycolorcode}\verb|C|}.
+\item There might be more threads than the number of elements to add, therefore {\color{mycolorcode}\verb|if|} is needed.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 2: thread, block, grid, kernel}
+\begin{itemize}
+\item To call the kernel from the host program, one must specify the number of blocks and threads per block:
+{\tiny
+{\color{mycolorcode}
+\begin{verbatim}
+vectorAdd<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, numElements);
+\end{verbatim}
+}
+}
+\item The same kernel can be called with different grid and block dimensions.
+\item After the kernel completes, we copy the result back to the host and free device memory:
+{\color{mycolorcode}
+\begin{verbatim}
+cudaMemcpy(h_C, d_C, size, cudaMemcpyDeviceToHost);
+cudaFree(d_A);
+cudaFree(d_B);
+cudaFree(d_C);
+\end{verbatim}
+}
+\item Finally we free memory for host variables.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 2: thread, block, grid, kernel}
+\begin{itemize}
+\item Until compute capability 5.0, the device code should be in the same file as the host code that calls the kernel.
+\item Since we are using K80 with compute cability 3.7, this is the case for us.
+\item The files that contain device code typically have {\color{mycolorcli}cu} extension.
+\item To compile the code, we need to use {\color{mycolorcli}nvcc} compiler that would compile device code and call system compiler to build the host code and then link them together:
+{\color{mycolorcli}
+\begin{verbatim}
+nvcc -o vectorAdd vectorAdd.cu
+\end{verbatim}
+}
+\item By default, {\color{mycolorcli}nvcc} would compile the code for the current hardware. One can specify compute capability and exact SM architecture, one can even specify several. 
+JIT compilation is supported as well to be able to run on new hardware for which the program was not originally compiled. 
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 2: thread, block, grid, kernel}
+\begin{itemize}
+\item Now when we understood the overall structure of {\color{mycolorcli}\verb|vectorAdd.cu|}, let us look at the original file from {\color{mycolorcli}\verb|samples/0_Simple/vectorAdd|}
+\item The main thing that I skipped for simplicity is error handling.
+{\tiny
+{\color{mycolorcli}
+\begin{verbatim}
+cudaError_t err = cudaSuccess;
+...
+err = cudaMalloc((void **)&d_A, size);
+if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to allocate device vector A (error code %s)!\n", 
+                cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+...
+err = cudaMemcpy(d_A, h_A, size, cudaMemcpyHostToDevice);
+...
+vectorAdd<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, numElements);
+err = cudaGetLastError();
+...
+err = cudaFree(d_A);
+\end{verbatim}
+}
+}
+\item The error checking should be done after each CUDA call. Otherwise, you might not notice that the program is working incorrectly and producing wrong results.
+\end{itemize}
+\end{frame}

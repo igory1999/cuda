@@ -1,0 +1,43 @@
+\section{Conclusion}
+\begin{frame}[fragile]
+  \frametitle{Conclusion}
+\begin{itemize}
+  \item In this tutorials we covered most of the CUDA constructions that you need
+    to start accelerating your program.
+  \item However, before diving into such a low level programming and reinventing a wheel, 
+    consider using existing accelerated libraries:
+    \begin{itemize}
+    \item \mycode{CUDA math library} that implements all the standard math functions
+    \item \mycode{cuBLAS} - Basic Linear Algebra Subprograms
+    \item \mycode{NVBLAS} - multigpu version of BLAS
+    \item \mycode{cuFFT} - Fast Fourier Transform
+    \item \mycode{nvGRAPH} - graph processing routines
+    \item \mycode{cuRAND} - random numbers generators
+    \item \mycode{cuSPARSE} - linear algebra for sparse matrices
+    \item \mycode{NPP} - image, video processing
+    \item \mycode{cuSOLVER} - higher level linear algebra routines on top of cuBlas and cuSparse
+    \item \mycode{Magma} - Matrix Algebra on GPU and Multicore Architectures
+    \item \mycode{AmgX} - Multi-Grid Accelerated Linear Solvers for Industrial Applications
+    \item \mycode{ArrayFire} - signal and image processing
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Conclusion}
+\begin{itemize}
+\item Continued:
+\begin{itemize}
+    \item \mycode{GUNROCK} - graph processing
+    \item \mycode{GPP} - computational geometry 
+    \item \mycode{CUB} - provides a collection of building blocks, includes sort, scan, reduction
+    \item \mycode{cuDNN} - library for Deep Neural Networks
+\end{itemize}
+\item There are also higher level frameworks that make it easier to do GPU programming:
+  \begin{itemize}
+  \item \mycode{OpenACC} - high level pragma based framework for GPU acceleration, similar to OpenMP
+  \item \mycode{Thrust} - C++ framework similar to STL
+  \item \mycode{Kokkos} - another high-level C++ template library
+  \end{itemize}
+\end{itemize}
+\end{frame}

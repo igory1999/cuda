@@ -1,0 +1,15 @@
+\subsection{strong}
+\begin{frame}[fragile]
+  \frametitle{Scaling: strong}
+\begin{itemize}
+\item By how much can one speed up a program using $N$ processors, if the program spends $P$ fraction of its time in the part of the code that can be parallezed?
+\item Assuming the best case of {\color{mycolordef}linear scaling}:
+\begin{equation*}
+speedup = \frac{P + (1 - P)}{\frac{P}{N} + (1 - P)} = \frac{1}{\frac{P}{N} + (1 - P)}
+\end{equation*}
+\item The above equation is called {\color{mycolordef}Amdahl's law}, it describes {\color{mycolordef}strong scaling} - how faster can one do a fixed amount of work given more processors.
+\item Obviously, the bigger is $P$, the more sense it makes to spend efforts parallelizing the corresponding part of the code.
+\item For example, assuming the best case $N=\infty$ and linear scaling, if $P=0.99$, $speedup = 100$; however, if $P=0.5$, $speedup=2$. 
+\item In reality, linear scaling is too optimistic and is often limited by communication overhead, synchronization, memory bandwidth, etc.
+\end{itemize}
+\end{frame}

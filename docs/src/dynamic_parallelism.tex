@@ -1,0 +1,8 @@
+\begin{frame}[fragile]
+  \frametitle{CUDA programming}
+\begin{itemize}
+\item Until compute capability X, kernel could only be called from the host and not from another kernel.
+\item Considering all the communication overhead between host and device, this is rather constraining.
+\item Now one can call kernels from kernels. It must be defined with {\color{mycolorcode}\verb|__device__|} modifier.
+\end{itemize}
+\end{frame}

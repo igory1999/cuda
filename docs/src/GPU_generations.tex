@@ -1,0 +1,24 @@
+\subsection{Generations of GPU cards}
+\begin{frame}[fragile]
+  \frametitle{GPU hardware: Generations of GPU cards}
+\begin{itemize}
+\item For each compute capability NVIDIA releases many cards 
+  for different usage mode: gaming, graphics, laptops, desktops, tablets, data center, etc
+\item They differ by such hardware resources as memory, number of SMs, number of registers, etc.
+\item We shall list here only several recent data center quality cards used for heavy computations. 
+
+{\tiny
+\begin{center}
+\begin{tabular}{ |r|p{1.0cm}|p{0.9cm}|p{0.25cm}|r|p{0.7cm}|p{0.9cm}|p{0.8cm}|p{0.8cm}| } 
+ \hline
+ Model & {Micro Architecture} & {Compute Capability} & SMs  & cores &  Memory (GB) & {Connection to CPU} & {Bandwidth to CPU (GB/s)} & {Bandwidth to memory (GB/s)} \\ \hline
+ K80   & Kepler               & 3.7                  & 2x13 & 2x2496& 2x12         & PCIe                & 12                        & 2x240                        \\ \hline
+ P100  & Pascal               & 6.0                  & 56   & 3584  & 12, 16       & PCIe, NVlink        & 32, 160                   & 549, 732                     \\ \hline
+ V100  & Volta                & 7.0                  & 80   & 5120  & 16, 32       & PCIe, NVlink        & 32, 300                   & 900                          \\ \hline
+\end{tabular}
+\end{center}
+}
+
+\item Modern consumer level GPU cards found in laptops and desktop typically can also be used for GPU computing.
+\end{itemize}
+\end{frame}

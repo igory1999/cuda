@@ -1,0 +1,64 @@
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 6: coalescing}
+\begin{itemize}
+\item One of the most important performance consideration in programming for
+  CUDA-capable GPU architectures, according to the documentation, is the \mydef{coalescing} of global memory accesses. 
+\item Global memory loads and stores by threads of a warp are coalesced by the device into as few as
+  one transaction when certain access requirements are met.
+\item The access requirements for coalescing depend on the compute capability of the device
+\item For devices of compute capability 2.x, for example, the concurrent accesses of the threads of a warp will coalesce into a number of
+  transactions equal to the number of cache lines necessary to service all of the threads
+  of the warp.
+\item By default, all accesses are cached through L1, which as 128-byte lines. For
+  scattered access patterns, to reduce overfetch, it can sometimes be useful to cache only in
+  L2, which caches shorter 32-byte segments.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 6: coalescing}
+\begin{itemize}
+\item For devices of compute capability 3.x, accesses to global memory are cached only in L2;
+  L1 is reserved for local memory accesses.
+\item In the lab, we are trying to copy one array into another using coalesced, misaligned and strided access:
+{\tiny
+{\color{mycolorcode}
+\begin{verbatim}
+__global__ void copy1(float *a, float *b, int n)
+{
+  int id = threadIdx.x + blockDim.x * blockIdx.x;
+  if(id < n)
+    a[id] = b[id];
+}
+
+__global__ void copy2(float *a, float *b, int n, int offset)
+{
+  int id = threadIdx.x + blockDim.x * blockIdx.x;
+  if(id < n)
+    a[id] = b[(id + offset) % n];
+}
+
+__global__ void copy3(float *a, float *b, int n, int stride)
+{
+  int id = threadIdx.x + blockDim.x * blockIdx.x;
+  if(id < n)
+    a[id] = b[(id * stride) % n];
+}
+\end{verbatim}
+}
+}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 6: coalescing}
+\begin{itemize}
+\item Probably because K80 has compute capability 3.7, 
+  I do not see that much difference in coalesced, misaligned or strided access to global memory in the lab:
+  \begin{itemize}
+  \item Running time for coalleced access is 130 ms
+  \item Running time for misaligned and strided access is 155 ms
+  \end{itemize}
+\end{itemize}
+\end{frame}

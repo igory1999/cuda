@@ -1,0 +1,36 @@
+\section{How to get the tutorial and log into midway 2}
+\begin{frame}[fragile]
+  \frametitle{How to get the tutorial and log into midway 2}
+  \begin{itemize}
+  \item Point your browser to
+    {\small
+      {\color{mycolorcli}
+\begin{verbatim}
+https://git.rcc.uchicago.edu/ivy2/cuda
+\end{verbatim}
+      }
+    }
+    \item If you have RCC account and allocation, login to midway 2 as usual: 
+{\color{mycolorcli}
+\begin{verbatim}
+ssh -Y <username>@midway2.rcc.uchicago.edu
+\end{verbatim}
+}
+\begin{itemize}
+\item For more details, see:
+  {\color{mycolorcli}\verb|https://rcc.uchicago.edu/docs/connecting/index.html|}
+\end{itemize}
+\item If you do not have RCC allocation, use yubikey: {\color{mycolorcli}\verb|https://git.rcc.uchicago.edu/ivy2/yubikey|}
+\item Once on midway 2, clone the tutorial with the labs:
+    {\small
+      {\color{mycolorcli}
+\begin{verbatim}
+git clone https://git.rcc.uchicago.edu/ivy2/cuda.git
+\end{verbatim}
+      }
+    }
+    \item The labs are in  {\color{mycolorcli}\verb|cuda/labs|}
+    \item The presentation is in  {\color{mycolorcli}\verb|cuda/docs/CUDA.pdf|}
+%    \item Set up the environment {\color{mycolorcli}\verb|source cuda/labs/env.sh|}
+    \end{itemize}
+  \end{frame}

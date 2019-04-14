@@ -1,0 +1,15 @@
+\subsection{Compute Capability}
+\begin{frame}[fragile]
+  \frametitle{GPU hardware: Compute Capability}
+\begin{itemize}
+\item {\color{mycolordef}Compute Capability} defines a set of features that the program can use
+\item GPU cards are advertised to support particular compute capability
+\item K80 has compute capability 3.7, while V100 is compute capability 7.0 and the latest Turing architecture supports 7.5
+\item When you compile binary that would run on GPU, you specify on the features from what compute capability your code relies
+\item You can also specify for what particular hardware you build the code and save binaries for different GPU cards in the same executable
+\item Executable also contains so called {\color{mycolordef}PTX} code which is basically an assembler code for GPU hardware that supports the specified compute capability.
+\item PTX allows {\color{mycolordef}JIT - just in time compilation}: if you try to run your binary on the card for which the code was not compiled it gets 
+  recompiled at run time provided that the card is backward compatible
+  with the specified compute capability.
+\end{itemize}
+\end{frame}

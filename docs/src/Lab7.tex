@@ -1,0 +1,121 @@
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 7: atomics}
+\begin{itemize}
+\item Suppose we want each thread to increment a counter:
+{\color{mycolorcode}
+\begin{verbatim}
+__device__ int counter = 0;
+__global__ void increment()
+{
+  counter++;
+}
+\end{verbatim}
+}
+where \mycode{counter} above is a global device variable initialize to 0.
+\item We naively expect that at the end the counter will be equal to the number of threads.
+\item We block size is 1024 and grid size is 1024. So the total number of threads is 1048576.
+\item However, when we run the program, each time we get a different number: 54, 56, 53, ...
+\item The problem is \mydef{race condition}.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 7: atomics}
+\begin{itemize}
+\item Incrementing a counter is not an \mydef{atomic operation} but consists of several atomic operations: 
+  \begin{itemize}
+  \item first the current value of the counter needs to be read from global memory into the register of the thread
+  \item then the thread needs to increment it in register
+  \item finally it writes it back into global memory
+  \end{itemize}
+\item For a sequential program this is not a problem.
+\item However, for a multithreaded program it is since the order of those operations is not defined. For example, it can be as follows:
+  \begin{itemize}
+  \item Thread 1 reads counter = 3 into register;
+  \item Thread 2 reads counter = 3 into register;
+  \item Thread 1 increments the register to 4;
+  \item Thread 1 writes 4 into the global variable counter which is now 4;
+  \item Thread 2 increments its register to 4;
+  \item Thread 2 writes its register to the global variable counter which is now 4.
+  \item However, we obviously want it to be 5.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+  
+
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 7: atomics}
+\begin{itemize}
+\item To handle such situation, CUDA provides atomic operations. For example, we can rewrite the previous kernel:
+{\color{mycolorcode}
+\begin{verbatim}
+__global__ void increment()
+{
+  atomicAdd(&counter, 1);
+}
+\end{verbatim}
+}
+\item Now the counter behaves as expected since once one thread starts changing the counter, others 
+  would have to wait until the operation is finished.
+\item There are the following atomic functions available: \mycode{atomicAdd}, \mycode{atomicSub}, \mycode{atomicExch}, \mycode{atomicMin}, \mycode{atomicMax}, 
+  \mycode{atomicInc}, \mycode{atomicDec}, \mycode{atomicCAS}, \mycode{atomicAnd}, \mycode{atomicOr}, \mycode{atomicXor}.
+\item Unfortunately most of the atomic operations are provided for integers only.
+\item One can use \mycode{atomicCAS} to create atomic operations for other data types.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 7: atomics}
+\begin{itemize}
+\item \mycode{atomicCAS} stands for \mydef{atomic Compare And Swap}
+{\tiny
+{\color{mycolorcode}
+\begin{verbatim}
+int atomicCAS(int* address, int compare, int val);
+
+unsigned int atomicCAS(unsigned int* address, unsigned int compare, unsigned int val);
+
+unsigned long long int atomicCAS(unsigned long long int* address, 
+                                 unsigned long long int compare, 
+                                 unsigned long long int val);
+\end{verbatim}
+}
+}
+\item It reads the 32-bit or 64-bit word old located at the address \mycode{address} in global or shared
+  memory, computes {\color{mycolorcode}\verb|(old == compare ? val : old)|} , and stores the result back
+  to memory at the same address. 
+\item These three operations are performed in one atomic
+  transaction. The function returns \mycode{old}.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{CUDA programming: Lab 7: atomics}
+\begin{itemize}
+\item Here is how \mycode{myAtomicAdd} for doubles can be implemented using \mycode{atomicCAS}
+{\tiny
+{\color{mycolorcode}
+\begin{verbatim}
+__device__ double myAtomicAdd(double * address, double val)
+{
+  unsigned long long int * address_as_ull = 
+    (unsigned long long int*)address;
+  unsigned long long int old = *address_as_ull, assumed;
+  do {
+    assumed = old;
+    old = atomicCAS(address_as_ull, assumed,
+                    __double_as_longlong(val + __longlong_as_double(assumed)));
+  } while (assumed != old);
+
+  return __longlong_as_double(old);
+}
+\end{verbatim}
+}
+}
+\item Notice: atomics introduce some communication overhead since a variable is locked for other threads until the thread 
+  that aquired the lock finishes with it.
+\end{itemize}
+\end{frame}

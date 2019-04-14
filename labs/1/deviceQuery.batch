@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#SBATCH --job-name=deviceQuery
+#SBATCH --partition=gpu2
+#SBATCH --gres=gpu:1
+#SBATCH --output=deviceQuery.out
+#SBATCH --error=deviceQuery.err
+##SBATCH --reservation=CUDA
+
+module load cuda/10.0
+
+$CUDA_HOME/samples/1_Utilities/deviceQuery/deviceQuery
